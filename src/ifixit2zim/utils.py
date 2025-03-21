@@ -67,6 +67,14 @@ class Utils:
         """normalized path part of an url"""
         return self.normalize_ident(urllib.parse.urlparse(url).path)
 
+    @backoff.on_exception(
+        backoff.expo,
+        requests.exceptions.HTTPError,
+        max_tries=5,
+        factor=2,
+        jitter=backoff.full_jitter,
+        on_backoff=backoff_hdlr,
+    )
     def fetch(self, path: str, **params) -> tuple[str, list[str]]:
         """(source text, actual_paths) of a path from source website
 
